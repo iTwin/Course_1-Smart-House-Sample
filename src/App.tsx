@@ -5,10 +5,10 @@ import React, { useEffect, useState } from "react";
 
 import AuthorizationClient from "./AuthorizationClient";
 import { Header } from "./Header";
-import { IModelConnection, IModelApp, ScreenViewport } from "@bentley/imodeljs-frontend";
-import { Visualization } from "./Visualization";
+import { IModelApp, IModelConnection, ScreenViewport } from "@bentley/imodeljs-frontend";
 import { DisplayStyleSettingsProps } from "@bentley/imodeljs-common";
-import { SmartDeviceAPI } from "./SmartDeviceAPI";
+import { Visualization } from "./Visualization"
+import { SmartDeviceDecorator } from "./components/decorators/SmartDeviceDecorator";
 
 const App: React.FC = () => {
   const [isAuthorized, setIsAuthorized] = useState(
@@ -75,11 +75,12 @@ const App: React.FC = () => {
           shadows: true
         }
       }
+
       vp.overrideDisplayStyle(viewStyle);
-      
-      console.log(await SmartDeviceAPI.getData());
       Visualization.hideHouseExterior(vp);
-    });
+      IModelApp.viewManager.addDecorator(new SmartDeviceDecorator(vp));
+    })
+
   }
 
   return (
