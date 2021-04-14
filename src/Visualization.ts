@@ -2,10 +2,15 @@ import { IModelConnection, ScreenViewport } from "@bentley/imodeljs-frontend";
 
 export class Visualization {
 
-  public static hideHouseExterior = async (vp: ScreenViewport) => {
+  public static hideHouseExterior = async (vp: ScreenViewport, toggle?: boolean) => {
 
     const categoryIds = await Visualization.getCategoryIds(vp.iModel);
-    vp.changeCategoryDisplay(categoryIds, false);
+
+    if (toggle) {
+      vp.changeCategoryDisplay(categoryIds, toggle);
+    } else {
+      vp.changeCategoryDisplay(categoryIds, false);
+    }
   }
 
   private static getCategoryIds = async (iModel: IModelConnection) => {

@@ -9,6 +9,7 @@ import { IModelApp, IModelConnection, ScreenViewport } from "@bentley/imodeljs-f
 import { DisplayStyleSettingsProps } from "@bentley/imodeljs-common";
 import { Visualization } from "./Visualization"
 import { SmartDeviceDecorator } from "./components/decorators/SmartDeviceDecorator";
+import { SmartDeviceUiItemsProvider } from "./providers/SmartDeviceUiItemsProvider";
 
 const App: React.FC = () => {
   const [isAuthorized, setIsAuthorized] = useState(
@@ -99,6 +100,7 @@ const App: React.FC = () => {
             iModelId={process.env.IMJS_IMODEL_ID ?? ""}
             authConfig={{ oidcClient: AuthorizationClient.oidcClient }}
             onIModelConnected={onIModelConnected}
+            uiProviders={[new SmartDeviceUiItemsProvider()]}
           />
         )
       )}
