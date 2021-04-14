@@ -5,6 +5,8 @@ import React, { useEffect, useState } from "react";
 
 import AuthorizationClient from "./AuthorizationClient";
 import { Header } from "./Header";
+import { IModelConnection, IModelApp, ScreenViewport } from "@bentley/imodeljs-frontend";
+import { Visualization } from "./Visualization";
 
 const App: React.FC = () => {
   const [isAuthorized, setIsAuthorized] = useState(
@@ -61,6 +63,14 @@ const App: React.FC = () => {
     setIsAuthorized(false);
   };
 
+  const onIModelConnected = (_imodel: IModelConnection) => {
+
+    IModelApp.viewManager.onViewOpen.addOnce(async (vp: ScreenViewport) => {
+
+      Visualization.hideHouseExterior(vp);
+    });
+  }
+
   return (
     <div className="viewer-container">
       <Header
@@ -76,6 +86,7 @@ const App: React.FC = () => {
             contextId={process.env.IMJS_CONTEXT_ID ?? ""}
             iModelId={process.env.IMJS_IMODEL_ID ?? ""}
             authConfig={{ oidcClient: AuthorizationClient.oidcClient }}
+            onIModelConnected={onIModelConnected}
           />
         )
       )}
