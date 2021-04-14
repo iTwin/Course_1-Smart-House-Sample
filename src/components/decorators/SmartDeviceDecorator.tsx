@@ -1,4 +1,5 @@
 import { DecorateContext, Decorator, IModelConnection, Marker, ScreenViewport } from "@bentley/imodeljs-frontend";
+import { SmartDeviceMarker } from "../markers/SmartDeviceMarker";
 
 export class SmartDeviceDecorator implements Decorator {
   private _iModel: IModelConnection;
@@ -14,6 +15,7 @@ export class SmartDeviceDecorator implements Decorator {
   private async getSmartDeviceData() {
     const query = `
       SELECT SmartDeviceId,
+              SmartDeviceType,
               Origin
               FROM DgnCustomItemTypes_HouseSchema.SmartDevice
               WHERE Origin IS NOT NULL
@@ -32,17 +34,12 @@ export class SmartDeviceDecorator implements Decorator {
     const values = await this.getSmartDeviceData();
 
     values.forEach(value => {
-      const smartDeviceMarker = new Marker(
+      const smartDeviceMarker = new SmartDeviceMarker(
         { x: value.origin.x, y: value.origin.y, z: value.origin.z },
-        { x: 50, y: 50 }
+        { x: 40, y: 40 },
+        value.smartDeviceId,
+        value.smartDeviceType
       );
-
-      const htmlElement = document.createElement("div");
-      htmlElement.innerHTML = `
-        <h3>${value.smartDeviceId}</h3>
-      `
-
-      smartDeviceMarker.htmlElement = htmlElement;
 
       this._markerSet.push(smartDeviceMarker);
     })
