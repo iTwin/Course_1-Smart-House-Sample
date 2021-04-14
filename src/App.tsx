@@ -7,6 +7,7 @@ import AuthorizationClient from "./AuthorizationClient";
 import { Header } from "./Header";
 import { IModelConnection, IModelApp, ScreenViewport } from "@bentley/imodeljs-frontend";
 import { Visualization } from "./Visualization";
+import { DisplayStyleSettingsProps } from "@bentley/imodeljs-common";
 
 const App: React.FC = () => {
   const [isAuthorized, setIsAuthorized] = useState(
@@ -67,6 +68,14 @@ const App: React.FC = () => {
 
     IModelApp.viewManager.onViewOpen.addOnce(async (vp: ScreenViewport) => {
 
+      const viewStyle: DisplayStyleSettingsProps = {
+        viewflags: {
+          visEdges: false,
+          shadows: true
+        }
+      }
+      vp.overrideDisplayStyle(viewStyle);
+      
       Visualization.hideHouseExterior(vp);
     });
   }
