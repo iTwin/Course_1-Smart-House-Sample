@@ -1,3 +1,13 @@
 .viewer-container {
   height: calc(100vh - 50px);
 }
+
+.smart-table {
+  font-size: 12px;
+
+  > td, th {
+    border: 1px solid black;
+    text-align: left;
+    padding: 8px;
+  }
+}
