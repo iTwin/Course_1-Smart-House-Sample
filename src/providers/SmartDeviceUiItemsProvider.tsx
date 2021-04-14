@@ -1,6 +1,8 @@
 import { IModelApp } from "@bentley/imodeljs-frontend";
-import { UiItemsProvider, ToolbarUsage, ToolbarOrientation, CommonToolbarItem, StageUsage, ToolbarItemUtilities } from "@bentley/ui-abstract";
+import { UiItemsProvider, ToolbarUsage, ToolbarOrientation, CommonToolbarItem, StageUsage, ToolbarItemUtilities, StagePanelLocation, StagePanelSection, AbstractWidgetProps } from "@bentley/ui-abstract";
 import { Visualization } from "../Visualization";
+import { SmartDeviceListWidgetComponent } from "../components/widgets/SmartDeviceListWidgetComponent";
+import * as React from "react";
 
 export class SmartDeviceUiItemsProvider implements UiItemsProvider {
   public readonly id = "SmartDeviceUiProvider";
@@ -29,5 +31,26 @@ export class SmartDeviceUiItemsProvider implements UiItemsProvider {
     }
     
     return toolbarButtonItems;
+  }
+
+  public provideWidgets(stageId: string, stageUsage: string, location: StagePanelLocation, section?: StagePanelSection) : ReadonlyArray<AbstractWidgetProps> {
+    const widgets: AbstractWidgetProps[] = [];
+
+    if (stageId === "DefaultFrontstage" && location === StagePanelLocation.Right) {
+
+      const widget: AbstractWidgetProps = {
+        id: "smartDeviceListWidget",
+        label: "Smart Devices",
+        getWidgetContent: () => {
+          return <SmartDeviceListWidgetComponent></SmartDeviceListWidgetComponent>
+        }
+      }
+
+      widgets.push(widget);
+
+    }
+
+    return widgets;
+
   }
 }
