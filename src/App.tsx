@@ -8,6 +8,7 @@ import { Header } from "./Header";
 import { IModelConnection, IModelApp, ScreenViewport } from "@bentley/imodeljs-frontend";
 import { Visualization } from "./Visualization";
 import { DisplayStyleSettingsProps } from "@bentley/imodeljs-common";
+import { SmartDeviceAPI } from "./SmartDeviceAPI";
 
 const App: React.FC = () => {
   const [isAuthorized, setIsAuthorized] = useState(
@@ -76,6 +77,7 @@ const App: React.FC = () => {
       }
       vp.overrideDisplayStyle(viewStyle);
       
+      console.log(await SmartDeviceAPI.getData());
       Visualization.hideHouseExterior(vp);
     });
   }
