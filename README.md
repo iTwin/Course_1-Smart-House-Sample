@@ -14,7 +14,14 @@ IMJS_CONTEXT_ID = ""
 IMJS_IMODEL_ID = ""
 ```
 
-You can also replace the OIDC client data in this file with your own if you'd prefer.
+You'll also need to fill out:
+
+```
+# ---- Authorization Client Settings ----
+IMJS_AUTH_CLIENT_CLIENT_ID=
+```
+
+This is left blank to encourage use of your own OIDC client.
 
 ## Available Scripts
 
