@@ -1,5 +1,5 @@
-import { XAndY, XYAndZ } from "@bentley/geometry-core";
-import { Marker, BeButtonEvent, IModelApp, NotifyMessageDetails, OutputMessagePriority, StandardViewId } from "@bentley/imodeljs-frontend";
+import { XAndY, XYAndZ } from "@itwin/core-geometry";
+import { Marker, BeButtonEvent, IModelApp, NotifyMessageDetails, OutputMessagePriority, StandardViewId } from "@itwin/core-frontend";
 
 export class SmartDeviceMarker extends Marker {
   private _smartDeviceId: string;

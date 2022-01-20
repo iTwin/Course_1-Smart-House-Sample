@@ -1,4 +1,9 @@
-import { Button, ButtonType } from "@bentley/ui-core";
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
+import { Button } from "@itwin/itwinui-react";
 import React from "react";
 
 import styles from "./Header.module.scss";
@@ -20,7 +25,8 @@ export const Header: React.FC<HeaderProps> = ({
         <Button
           className={styles.button}
           onClick={handleLogin}
-          buttonType={ButtonType.Primary}
+          styleType={"cta"}
+          size={"small"}
           disabled={loggedIn}
         >
           {"Sign In"}
@@ -28,7 +34,8 @@ export const Header: React.FC<HeaderProps> = ({
         <Button
           className={styles.button}
           onClick={handleLogout}
-          buttonType={ButtonType.Primary}
+          styleType={"high-visibility"}
+          size={"small"}
           disabled={!loggedIn}
         >
           {"Sign Out"}

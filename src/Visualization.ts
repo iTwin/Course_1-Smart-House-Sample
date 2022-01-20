@@ -1,4 +1,4 @@
-import { IModelConnection, ScreenViewport } from "@bentley/imodeljs-frontend";
+import { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 
 export class Visualization {
 
@@ -36,8 +36,9 @@ export class Visualization {
     const result = iModel.query(query);
     const categoryIds = [];
 
-    for await (const row of result)
-        categoryIds.push(row.id);
+    for await (const row of result) {
+      categoryIds.push(row[0]);
+    }
 
     return categoryIds;
   }

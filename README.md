@@ -10,7 +10,7 @@ Prior to running the app, add a valid contextId and iModelId for your user in th
 
 ```
 # ---- Test ids ----
-IMJS_CONTEXT_ID = ""
+IMJS_ITWIN_ID = ""
 IMJS_IMODEL_ID = ""
 ```
 

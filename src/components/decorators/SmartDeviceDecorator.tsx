@@ -1,7 +1,7 @@
-import { DecorateContext, Decorator, IModelConnection, Marker, ScreenViewport } from "@bentley/imodeljs-frontend";
+import { DecorateContext, Decorator, IModelConnection, Marker, ScreenViewport } from "@itwin/core-frontend";
 import { SmartDeviceMarker } from "../markers/SmartDeviceMarker";
 import { SmartDeviceAPI } from "../../SmartDeviceAPI";
-import { UiFramework } from "@bentley/ui-framework";
+import { UiFramework } from "@itwin/appui-react";
 
 export class SmartDeviceDecorator implements Decorator {
   private _iModel: IModelConnection;
@@ -38,13 +38,18 @@ export class SmartDeviceDecorator implements Decorator {
     const cloudData = await SmartDeviceAPI.getData();
 
     values.forEach(value => {
+      const smartDeviceId = value[0];
+      const smartDeviceType = value[1];
+      const smartDeviceECInstanceId = value[2];
+      const origin = value[3];
+
       const smartDeviceMarker = new SmartDeviceMarker(
-        { x: value.origin.x, y: value.origin.y, z: value.origin.z },
+        { x: origin.X, y: origin.Y, z: origin.Z },
         { x: 40, y: 40 },
-        value.smartDeviceId,
-        value.smartDeviceType,
-        cloudData[value.smartDeviceId],
-        value.id
+        smartDeviceId,
+        smartDeviceType,
+        cloudData[smartDeviceId],
+        smartDeviceECInstanceId
       );
 
       this._markerSet.push(smartDeviceMarker);

@@ -1,70 +1,125 @@
+/*---------------------------------------------------------------------------------------------
+ * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+ * See LICENSE.md in the project root for license terms and full copyright notice.
+ *--------------------------------------------------------------------------------------------*/
+
 import "./App.scss";
 
-import { Viewer } from "@bentley/itwin-viewer-react";
-import React, { useEffect, useState } from "react";
+import { BrowserAuthorizationClient } from "@itwin/browser-authorization";
+import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
+import { FitViewTool, IModelApp, StandardViewId } from "@itwin/core-frontend";
+import { useAccessToken, Viewer } from "@itwin/web-viewer-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-import AuthorizationClient from "./AuthorizationClient";
 import { Header } from "./Header";
-import { IModelApp, IModelConnection, ScreenViewport } from "@bentley/imodeljs-frontend";
-import { DisplayStyleSettingsProps } from "@bentley/imodeljs-common";
+import { history } from "./history";
+import { DisplayStyleSettingsProps } from "@itwin/core-common";
+
 import { Visualization } from "./Visualization"
 import { SmartDeviceDecorator } from "./components/decorators/SmartDeviceDecorator";
 import { SmartDeviceUiItemsProvider } from "./providers/SmartDeviceUiItemsProvider";
 
 const App: React.FC = () => {
-  const [isAuthorized, setIsAuthorized] = useState(
-    AuthorizationClient.oidcClient
-      ? AuthorizationClient.oidcClient.isAuthorized
-      : false
-  );
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [iModelId, setIModelId] = useState(process.env.IMJS_IMODEL_ID);
+  const [iTwinId, setITwinId] = useState(process.env.IMJS_ITWIN_ID);
+
+  const accessToken = useAccessToken();
+
+  const authClient = useMemo(
+    () =>
+      new BrowserAuthorizationClient({
+        scope: process.env.IMJS_AUTH_CLIENT_SCOPES ?? "",
+        clientId: process.env.IMJS_AUTH_CLIENT_CLIENT_ID ?? "",
+        redirectUri: process.env.IMJS_AUTH_CLIENT_REDIRECT_URI ?? "",
+        postSignoutRedirectUri: process.env.IMJS_AUTH_CLIENT_LOGOUT_URI,
+        responseType: "code",
+        authority: process.env.IMJS_AUTH_AUTHORITY,
+      }),
+    []
+  );
 
   useEffect(() => {
-    const initOidc = async () => {
-      if (!AuthorizationClient.oidcClient) {
-        await AuthorizationClient.initializeOidc();
+    if (accessToken) {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has("iTwinId")) {
+        setITwinId(urlParams.get("iTwinId") as string);
+      } else {
+        if (!process.env.IMJS_ITWIN_ID) {
+          throw new Error(
+            "Please add a valid iTwin ID in the .env file and restart the application or add it to the iTwinId query parameter in the url and refresh the page. See the README for more information."
+          );
+        }
       }
 
-      try {
-        // attempt silent signin
-        await AuthorizationClient.signInSilent();
-        setIsAuthorized(AuthorizationClient.oidcClient.isAuthorized);
-      } catch (error) {
-        // swallow the error. User can click the button to sign in
+      if (urlParams.has("iModelId")) {
+        setIModelId(urlParams.get("iModelId") as string);
+      } else {
+        if (!process.env.IMJS_IMODEL_ID) {
+          throw new Error(
+            "Please add a valid iModel ID in the .env file and restart the application or add it to the iModelId query parameter in the url and refresh the page. See the README for more information."
+          );
+        }
       }
-    };
-    initOidc().catch((error) => console.error(error));
-  }, []);
+    }
+  }, [accessToken]);
 
   useEffect(() => {
-    if (!process.env.IMJS_CONTEXT_ID) {
-      throw new Error(
-        "Please add a valid context ID in the .env file and restart the application"
-      );
+    if (accessToken && iTwinId && iModelId) {
+      history.push(`?iTwinId=${iTwinId}&iModelId=${iModelId}`);
     }
-    if (!process.env.IMJS_IMODEL_ID) {
-      throw new Error(
-        "Please add a valid iModel ID in the .env file and restart the application"
-      );
-    }
-  }, []);
+  }, [accessToken, iTwinId, iModelId]);
 
   useEffect(() => {
-    if (isLoggingIn && isAuthorized) {
+    if (isLoggingIn && accessToken) {
       setIsLoggingIn(false);
     }
-  }, [isAuthorized, isLoggingIn]);
+  }, [accessToken, isLoggingIn]);
 
-  const onLoginClick = async () => {
+  const onLoginClick = useCallback(async () => {
     setIsLoggingIn(true);
-    await AuthorizationClient.signIn();
-  };
+    await authClient.signIn();
+  }, [authClient]);
 
-  const onLogoutClick = async () => {
+  const onLogoutClick = useCallback(async () => {
     setIsLoggingIn(false);
-    await AuthorizationClient.signOut();
-    setIsAuthorized(false);
-  };
+    await authClient.signOut();
+  }, [authClient]);
+
+  /** NOTE: This function will execute the "Fit View" tool after the iModel is loaded into the Viewer.
+   * This will provide an "optimal" view of the model. However, it will override any default views that are
+   * stored in the iModel. Delete this function and the prop that it is passed to if you prefer
+   * to honor default views when they are present instead (the Viewer will still apply a similar function to iModels that do not have a default view).
+   */
+  const viewConfiguration = useCallback((viewPort: ScreenViewport) => {
+    // default execute the fitview tool and use the iso standard view after tile trees are loaded
+    const tileTreesLoaded = () => {
+      return new Promise((resolve, reject) => {
+        const start = new Date();
+        const intvl = setInterval(() => {
+          if (viewPort.areAllTileTreesLoaded) {
+            clearInterval(intvl);
+            resolve(true);
+          }
+          const now = new Date();
+          // after 20 seconds, stop waiting and fit the view
+          if (now.getTime() - start.getTime() > 20000) {
+            reject();
+          }
+        }, 100);
+      });
+    };
+
+    tileTreesLoaded().finally(() => {
+      void IModelApp.tools.run(FitViewTool.toolId, viewPort, true, false);
+      viewPort.view.setStandardRotation(StandardViewId.Iso);
+    });
+  }, []);
+
+  const viewCreatorOptions = useMemo(
+    () => ({ viewportConfigurer: viewConfiguration }),
+    [viewConfiguration]
+  );
 
   const onIModelConnected = (_imodel: IModelConnection) => {
 
@@ -73,7 +128,7 @@ const App: React.FC = () => {
       const viewStyle: DisplayStyleSettingsProps = {
         viewflags: {
           visEdges: false,
-          shadows: true
+          shadows: false
         }
       }
 
@@ -87,22 +142,22 @@ const App: React.FC = () => {
   return (
     <div className="viewer-container">
       <Header
+        loggedIn={!!accessToken}
         handleLogin={onLoginClick}
-        loggedIn={isAuthorized}
         handleLogout={onLogoutClick}
       />
       {isLoggingIn ? (
         <span>"Logging in...."</span>
       ) : (
-        isAuthorized && (
-          <Viewer
-            contextId={process.env.IMJS_CONTEXT_ID ?? ""}
-            iModelId={process.env.IMJS_IMODEL_ID ?? ""}
-            authConfig={{ oidcClient: AuthorizationClient.oidcClient }}
-            onIModelConnected={onIModelConnected}
-            uiProviders={[new SmartDeviceUiItemsProvider()]}
-          />
-        )
+        <Viewer
+          iTwinId={iTwinId}
+          iModelId={iModelId}
+          authClient={authClient}
+          viewCreatorOptions={viewCreatorOptions}
+          enablePerformanceMonitors={true} // see description in the README (https://www.npmjs.com/package/@itwin/desktop-viewer-react)
+          onIModelConnected={onIModelConnected}
+          uiProviders={[new SmartDeviceUiItemsProvider()]}
+        />
       )}
     </div>
   );
