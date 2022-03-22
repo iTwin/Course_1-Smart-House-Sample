@@ -16,6 +16,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Visualization } from "./Visualization";
 import { DisplayStyleSettingsProps } from "@itwin/core-common";
 import { SmartDeviceDecorator } from "./components/decorators/SmartDeviceDecorator";
+import { SmartDeviceUiItemsProvider } from "./providers/SmartDeviceUiItemsProvider";
 
 import { history } from "./history";
 
@@ -151,6 +152,7 @@ const App: React.FC = () => {
         viewCreatorOptions={viewCreatorOptions}
         enablePerformanceMonitors={true} // see description in the README (https://www.npmjs.com/package/@itwin/desktop-viewer-react)
         onIModelConnected={onIModelConnected}
+        uiProviders={[new SmartDeviceUiItemsProvider()]}
       />
     </div>
   );
