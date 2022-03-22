@@ -123,7 +123,7 @@ const App: React.FC = () => {
       const viewStyle: DisplayStyleSettingsProps = {
         viewflags: {
           visEdges: false,
-          shadows: true
+          shadows: false
         }
       }
       vp.overrideDisplayStyle(viewStyle);

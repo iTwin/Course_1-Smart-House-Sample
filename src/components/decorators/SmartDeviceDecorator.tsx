@@ -18,6 +18,7 @@ export class SmartDeviceDecorator implements Decorator {
     const query = `
       SELECT SmartDeviceId,
               SmartDeviceType,
+              ECInstanceId,
               Origin
               FROM DgnCustomItemTypes_HouseSchema.SmartDevice
               WHERE Origin IS NOT NULL
@@ -42,7 +43,8 @@ export class SmartDeviceDecorator implements Decorator {
         { x: 40, y: 40 },
         value.smartDeviceId,
         value.smartDeviceType,
-        cloudData[value.smartDeviceId]
+        cloudData[value.smartDeviceId],
+        value.id
       );
 
       this._markerSet.push(smartDeviceMarker);
