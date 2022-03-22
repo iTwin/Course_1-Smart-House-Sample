@@ -12,6 +12,14 @@
 
 .smart-table {
   font-size: 12px;
+  width: 100%;
+
+  > tbody {
+    > tr:not(:first-child):hover {
+      background-color: skyblue;
+      cursor: pointer;
+    }
+  }
 
   > td, th {
     border: 1px solid black;
