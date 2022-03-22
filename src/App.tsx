@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Visualization } from "./Visualization";
 import { DisplayStyleSettingsProps } from "@itwin/core-common";
-import { SmartDeviceAPI } from "./SmartDeviceAPI";
+import { SmartDeviceDecorator } from "./components/decorators/SmartDeviceDecorator";
 
 import { history } from "./history";
 
@@ -128,8 +128,9 @@ const App: React.FC = () => {
       }
       vp.overrideDisplayStyle(viewStyle);
 
-      console.log(await SmartDeviceAPI.getData());
       Visualization.hideHouseExterior(vp);
+
+      IModelApp.viewManager.addDecorator(new SmartDeviceDecorator(vp));
     })
   }
 
