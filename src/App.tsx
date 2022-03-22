@@ -6,12 +6,14 @@
 import "./App.scss";
 
 import { BrowserAuthorizationClient } from "@itwin/browser-authorization";
-import type { ScreenViewport } from "@itwin/core-frontend";
+import type { IModelConnection, ScreenViewport } from "@itwin/core-frontend";
 import { FitViewTool, IModelApp, StandardViewId } from "@itwin/core-frontend";
 import { FillCentered } from "@itwin/core-react";
 import { ProgressLinear } from "@itwin/itwinui-react";
 import { useAccessToken, Viewer } from "@itwin/web-viewer-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+
+import { Visualization } from "./Visualization"
 
 import { history } from "./history";
 
@@ -112,6 +114,15 @@ const App: React.FC = () => {
     [viewConfiguration]
   );
 
+  const onIModelConnected = (_imodel: IModelConnection) => {
+
+    IModelApp.viewManager.onViewOpen.addOnce(async (vp: ScreenViewport) => {
+
+      Visualization.hideHouseExterior(vp);
+    })
+  }
+
+
   return (
     <div className="viewer-container">
       {!accessToken && (
@@ -127,6 +138,7 @@ const App: React.FC = () => {
         authClient={authClient}
         viewCreatorOptions={viewCreatorOptions}
         enablePerformanceMonitors={true} // see description in the README (https://www.npmjs.com/package/@itwin/desktop-viewer-react)
+        onIModelConnected={onIModelConnected}
       />
     </div>
   );
