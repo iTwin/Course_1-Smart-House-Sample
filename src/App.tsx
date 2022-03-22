@@ -13,7 +13,8 @@ import { ProgressLinear } from "@itwin/itwinui-react";
 import { useAccessToken, Viewer } from "@itwin/web-viewer-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Visualization } from "./Visualization"
+import { Visualization } from "./Visualization";
+import { DisplayStyleSettingsProps } from "@itwin/core-common";
 
 import { history } from "./history";
 
@@ -117,6 +118,14 @@ const App: React.FC = () => {
   const onIModelConnected = (_imodel: IModelConnection) => {
 
     IModelApp.viewManager.onViewOpen.addOnce(async (vp: ScreenViewport) => {
+
+      const viewStyle: DisplayStyleSettingsProps = {
+        viewflags: {
+          visEdges: false,
+          shadows: true
+        }
+      }
+      vp.overrideDisplayStyle(viewStyle);
 
       Visualization.hideHouseExterior(vp);
     })
